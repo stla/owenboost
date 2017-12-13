@@ -1,4 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE CPP, ForeignFunctionInterface #-}
 {-# LANGUAGE QuasiQuotes              #-}
 {-# LANGUAGE TemplateHaskell          #-}
 
@@ -79,6 +79,17 @@ owenC nu t delta r = do
   mr <- V.thaw (V.fromList r)
   ptr <- [CPP.exp| double* {
       owenC($(int nu), $(double t), $vec-ptr:(double* mdelta), $vec-ptr:(double* mr), $vec-len:mdelta)
+    } |]
+  VM.clear mdelta
+  VM.clear mr
+  peekArray (length delta) ptr
+
+owenQ :: CInt -> CDouble -> [CDouble] -> [CDouble] -> IO [CDouble]
+owenQ nu t delta r = do
+  mdelta <- V.thaw (V.fromList delta)
+  mr <- V.thaw (V.fromList r)
+  ptr <- [CPP.exp| double* {
+      owenQ($(int nu), $(double t), $vec-ptr:(double* mdelta), $vec-ptr:(double* mr), $vec-len:mdelta)
     } |]
   VM.clear mdelta
   VM.clear mr
