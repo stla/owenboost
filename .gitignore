@@ -1,0 +1,12 @@
+.stack-work/
+dist/
+.haskell-ghc-mod.json
+Gauss.hs
+*.dll
+*.dll.a
+.cabal-sandbox/
+cabal.sandbox.config
+*.hi
+*.o
+*.exe
+*.h
