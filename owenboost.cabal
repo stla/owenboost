@@ -40,6 +40,21 @@ executable testowen128
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , owenboost
+--
+foreign-library owen128
+  buildable: False
+  type:                native-shared
+  lib-version-info:    6:3:2
+  if os(Windows)
+    options: standalone
+    mod-def-file: exports.def
+  other-modules:       OwenExport
+  build-depends:       base >=4.7 && <5
+                     , owenboost
+  hs-source-dirs:      src-dll
+  c-sources:           StartEnd.c
+  extra-libraries: stdc++
+  default-language:    Haskell2010
 
 executable Owen128
   if flag(dll)

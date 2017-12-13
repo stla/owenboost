@@ -72,3 +72,14 @@ studentCDF q nu delta = do
 
 f :: Double
 f = 2
+
+owenC :: CInt -> CDouble -> [CDouble] -> [CDouble] -> IO [CDouble]
+owenC nu t delta r = do
+  mdelta <- V.thaw (V.fromList delta)
+  mr <- V.thaw (V.fromList r)
+  ptr <- [CPP.exp| double* {
+      owenC($(int nu), $(double t), $vec-ptr:(double* mdelta), $vec-ptr:(double* mr), $vec-len:mdelta)
+    } |]
+  VM.clear mdelta
+  VM.clear mr
+  peekArray (length delta) ptr
