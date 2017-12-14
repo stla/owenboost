@@ -1,4 +1,5 @@
 EXPORTS
  HsStart
  owenQexport
+ powenExport
  lockFile
