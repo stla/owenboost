@@ -16,40 +16,6 @@ CPP.context (CPP.cppCtx <> C.vecCtx)
 
 CPP.include "<owen128.cpp>"
 
-sumVec :: VM.IOVector CDouble -> IO CDouble
-sumVec vec = [CPP.block| double {
-    double sum = 0;
-    int i;
-    for (i = 0; i < $vec-len:vec; i++) {
-      sum += $vec-ptr:(double *vec)[i];
-    }
-    return sum;
-  } |]
-
-testvec :: IO ()
-testvec = do
-  x <- sumVec =<< V.thaw (V.fromList [1,2,3])
-  print x
-
--- doubleVec :: [CDouble] -> IO [CDouble]
--- doubleVec vec = do
---   mvec <- V.thaw (V.fromList vec)
---   ptr <- [CPP.block| double* {
---     double *out = new double[$vec-len:mvec];
---     int i;
---     for (i = 0; i < $vec-len:mvec; i++) {
---       out[i] = 2 * $vec-ptr:(double *mvec)[i];
---     }
---     return out;
---   } |]
---   peekArray (length vec) ptr
-
-doubleVec2 :: [CDouble] -> IO [CDouble]
-doubleVec2 x = do
-  xx <- V.thaw (V.fromList x)
-  ptr <- [CPP.exp| double* { testvectorout($vec-ptr:(double* xx), $vec-len:xx) } |]
-  peekArray (length x) ptr
-
 studentC :: CDouble -> CInt -> [CDouble] -> IO [CDouble]
 studentC q nu delta = do
   mdelta <- V.thaw (V.fromList delta)
@@ -59,9 +25,6 @@ studentC q nu delta = do
   VM.clear mdelta
   peekArray (length delta) ptr
 
-pnorm :: CDouble
-pnorm = [CPP.pure| double { pnorm(2.0) }|]
-
 studentCDF :: CDouble -> CInt -> [CDouble] -> IO [CDouble]
 studentCDF q nu delta = do
   mdelta <- V.thaw (V.fromList delta)
@@ -69,9 +32,6 @@ studentCDF q nu delta = do
       studentCDF($(double q), $(int nu), $vec-ptr:(double* mdelta), $vec-len:mdelta)
     } |]
   peekArray (length delta) ptr
-
-f :: Double
-f = 2
 
 owenC :: CInt -> CDouble -> [CDouble] -> [CDouble] -> IO [CDouble]
 owenC nu t delta r = do

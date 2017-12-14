@@ -30,15 +30,6 @@ mp::float128 pnorm128(mp::float128 q){
   return m::erfc(-q / root_two128)/2;
 }
 
-double* testvectorout(double* in, size_t n){
-  double* out = new double[n];
-  int i;
-  for(i=0; i<n; i++){
-    out[i] = pnorm(in[i]);
-  }
-  return out;
-}
-
 //********* Owen T-function **************************************************//
 //****** http://people.sc.fsu.edu/~jburkardt/cpp_src/owens/owens.html ********//
 double znorm1(double x){
@@ -138,11 +129,7 @@ double tfun ( double h, double a, double ah ){
 
   icode = select[ihint-1+(iaint-1)*15];
   m = ord[icode-1];
-  //
-  //  t1(h, a, m) ; m = 2, 3, 4, 5, 7, 10, 12 or 18
-  //  jj = 2j - 1 ; gj = exp(-h*h/2) * (-h*h/2)**j / j//
-  //  aj = a**(2j-1) / (2*pi)
-  //
+
   if ( meth[icode-1] == 1 )
   {
     hs = - 0.5 * h * h;
@@ -170,11 +157,7 @@ double tfun ( double h, double a, double ah ){
       gj = gj * hs / ( double ) ( j );
     }
   }
-  //
-  //  t2(h, a, m) ; m = 10, 20 or 30
-  //  z = (-1)**(i-1) * zi ; ii = 2i - 1
-  //  vi = (-1)**(i-1) * a**(2i-1) * exp[-(a*h)**2/2] / sqrt(2*pi)
-  //
+
   else if ( meth[icode-1] == 2 )
   {
     maxii = m + m + 1;
@@ -200,11 +183,7 @@ double tfun ( double h, double a, double ah ){
       ii = ii + 2;
     }
   }
-  //
-  //  t3(h, a, m) ; m = 20
-  //  ii = 2i - 1
-  //  vi = a**(2i-1) * exp[-(a*h)**2/2] / sqrt(2*pi)
-  //
+
   else if ( meth[icode-1] == 3 )
   {
     i = 1;
@@ -231,10 +210,7 @@ double tfun ( double h, double a, double ah ){
       ii = ii + 2;
     }
   }
-  //
-  //  t4(h, a, m) ; m = 4, 7, 8 or 20;  ii = 2i + 1
-  //  ai = a * exp[-h*h*(1+a*a)/2] * (-a*a)**i / (2*pi)
-  //
+
   else if ( meth[icode-1] == 4 )
   {
     maxii = m + m + 1;
@@ -258,10 +234,7 @@ double tfun ( double h, double a, double ah ){
       ai = ai * as;
     }
   }
-  //
-  //  t5(h, a, m) ; m = 13
-  //  2m - point gaussian quadrature
-  //
+
   else if ( meth[icode-1] == 5 )
   {
     value = 0.0;
@@ -274,9 +247,7 @@ double tfun ( double h, double a, double ah ){
     }
     value = a * value;
   }
-  //
-  //  t6(h, a);  approximation for a near 1, (a<=1)
-  //
+
   else if ( meth[icode-1] == 6 )
   {
     normh = znorm2 ( h );
@@ -360,7 +331,6 @@ double* studentCDF(double q, int nu, double* delta, size_t J){
   for(j=0; j<J; j++){
     dsb[j] = delta[j] * sb;
   }
-  //std::vector< std::vector<mp::float128> > M(nu-1, std::vector<mp::float128>(J));
   mp::float128 M[nu-1][J];
   for(j=0; j<J ; j++){
     M[0][j] = a * sb * dnorm128(dsb[j]) * pnorm128(a*dsb[j]);
@@ -466,9 +436,9 @@ double* owenQ(int nu, double t, double* delta, double* R, size_t J){
   const int n = nu-1;
   // plante si j'initialise les deux vecteurs !!
   //std::vector< std::vector<double> > M(n, std::vector<double>(J));
+  //std::vector< std::vector<double> > H(n, std::vector<double>(J));
   double H[n][J];
   double M[n][J];
-  //std::vector< std::vector<double> > H(n, std::vector<double>(J));
   for(j=0; j<J; j++){
     H[0][j] = -dnormR[j] * pnorm(a*R[j]-delta[j]);
     M[0][j] = asb * dnormdsb[j] * (pnorm(dsb[j]*a) - pnorm(dabminusRoversb[j]));
@@ -479,8 +449,7 @@ double* owenQ(int nu, double t, double* delta, double* R, size_t J){
       M[1][j] = delta[j]*ab*M[0][j] + ab * dnormdsb[j] * (dnorm(dsb[j]*a) - dnorm(dabminusRoversb[j]));
     }
     if(nu >= 4){
-      double A[n]; //std::vector<double> A(n);
-      //std::vector< std::vector<double> > L(n-2, std::vector<double>(J));
+      double A[n];
       double L[n-2][J];
       A[0] = 1;
       A[1] = 1;
