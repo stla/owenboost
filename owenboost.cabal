@@ -46,14 +46,14 @@ foreign-library owen128
   type:                native-shared
   lib-version-info:    6:3:2
   if os(Windows)
-    options: standalone
+    options:      standalone
     mod-def-file: exports.def
   other-modules:       OwenExport
   build-depends:       base >=4.7 && <5
                      , owenboost
   hs-source-dirs:      src-dll
   c-sources:           StartEnd.c
-  extra-libraries: stdc++
+  extra-libraries:     stdc++
   default-language:    Haskell2010
 
 executable Owen128
@@ -68,7 +68,7 @@ executable Owen128
   build-depends:       base >= 4.7 && < 5
                      , owenboost
   if os(windows)
-    ghc-options:         -lstdc++ -shared StartEnd.c -o Owen128.dll
+    ghc-options:         -lstdc++ -shared StartEnd.c -o Owen128.dll exports.def
   else
     ghc-options:         -threaded -O2 -shared -fPIC -dynamic -lHSrts-ghc8.0.2 StartEnd.c -o Owen128.so
 

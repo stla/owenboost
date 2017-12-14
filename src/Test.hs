@@ -94,3 +94,14 @@ owenQ nu t delta r = do
   VM.clear mdelta
   VM.clear mr
   peekArray (length delta) ptr
+
+owenQ128 :: CInt -> CDouble -> [CDouble] -> [CDouble] -> IO [CDouble]
+owenQ128 nu t delta r = do
+  mdelta <- V.thaw (V.fromList delta)
+  mr <- V.thaw (V.fromList r)
+  ptr <- [CPP.exp| double* {
+      owenQ128($(int nu), $(double t), $vec-ptr:(double* mdelta), $vec-ptr:(double* mr), $vec-len:mdelta)
+    } |]
+  VM.clear mdelta
+  VM.clear mr
+  peekArray (length delta) ptr
