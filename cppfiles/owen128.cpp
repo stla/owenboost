@@ -747,3 +747,120 @@ double* powen4(int nu, double t1, double t2, double* delta1, double* delta2, siz
     return out;
   }
 }
+
+double* powen128(int nu, double t1, double t2, double* delta1, double* delta2, size_t J){
+  if(nu == 1){
+    return powenC(nu, t1, t2, delta1, delta2, J);
+  }
+  mp::float128 t1t1(t1*t1);
+  mp::float128 a1 = sign(t1)*mp::sqrt(t1t1/nu);
+  mp::float128 b1 = nu/(nu+t1t1);
+  mp::float128 sb1(sqrt(b1));
+  mp::float128 ab1 = a1*b1;
+  mp::float128 t2t2(t2*t2);
+  mp::float128 a2 = sign(t2)*mp::sqrt(t2t2/nu);
+  mp::float128 b2 = nu/(nu+t2t2);
+  mp::float128 sb2(sqrt(b2));
+  mp::float128 ab2 = a2*b2;
+  mp::float128 asb1 = sign(t1)*mp::sqrt(t1t1/(nu+t1t1));
+  mp::float128 asb2 = sign(t2)*mp::sqrt(t2t2/(nu+t2t2));
+  mp::float128 R[J];
+  int j;
+  for(j=0; j<J; j++){
+    R[j] = sqrt(nu)*(delta1[j] - delta2[j])/(t1-t2);
+  }
+  mp::float128 dsb1[J];
+  mp::float128 dsb2[J];
+  mp::float128 dnormdsb1[J];
+  mp::float128 dnormdsb2[J];
+  mp::float128 dabminusRoversb1[J];
+  mp::float128 dabminusRoversb2[J];
+  mp::float128 dnormR[J];
+  for(j=0; j<J; j++){
+    dsb1[j] = delta1[j] * sb1;
+    dsb2[j] = delta2[j] * sb2;
+    dnormdsb1[j] = dnorm128(dsb1[j]);
+    dnormdsb2[j] = dnorm128(dsb2[j]);
+    dabminusRoversb1[j] = (delta1[j]*ab1 - R[j])/sb1;
+    dabminusRoversb2[j] = (delta2[j]*ab2 - R[j])/sb2;
+    dnormR[j] = dnorm128(R[j]);
+  }
+  const int n = nu-1;
+  mp::float128 M1[n][J];
+  mp::float128 M2[n][J];
+  mp::float128 H[n][J];
+  for(j=0; j<J; j++){
+    H[0][j] = -dnormR[j] * (pnorm128(a2*R[j]-delta2[j]) - pnorm128(a1*R[j]-delta1[j]));
+    M1[0][j] = asb1 * dnormdsb1[j] * (pnorm128(dsb1[j]*a1) - pnorm128(dabminusRoversb1[j]));
+    M2[0][j] = asb2 * dnormdsb2[j] * (pnorm128(dsb2[j]*a2) - pnorm128(dabminusRoversb2[j]));
+  }
+  if(nu >= 3){
+    for(j=0; j<J; j++){
+      H[1][j] = R[j] * H[0][j];
+      M1[1][j] = delta1[j]*ab1*M1[0][j] + ab1 * dnormdsb1[j] *
+                   (dnorm128(dsb1[j]*a1) - dnorm128(dabminusRoversb1[j]));
+      M2[1][j] = delta2[j]*ab2*M2[0][j] + ab2 * dnormdsb2[j] *
+                   (dnorm128(dsb2[j]*a2) - dnorm128(dabminusRoversb2[j]));
+    }
+    if(nu >= 4){
+      mp::float128 A[n];
+      mp::float128 L1[n-2][J];
+      mp::float128 L2[n-2][J];
+      A[0] = 1;
+      A[1] = 1;
+      for(j=0; j<J; j++){
+        L1[0][j] = ab1 * R[j] * dnormR[j] * dnorm128(a1*R[j]-delta1[j])/2;
+        L2[0][j] = ab2 * R[j] * dnormR[j] * dnorm128(a2*R[j]-delta2[j])/2;
+      }
+      int k;
+      for(k=2; k<n; k++){
+        A[k] = 1.0/k/A[k-1];
+      }
+      if(nu >= 5){
+        for(k=1; k<n-2; k++){
+          for(j=0; j<J; j++){
+            L1[k][j] = A[k+2] * R[j] * L1[k-1][j];
+            L2[k][j] = A[k+2] * R[j] * L2[k-1][j];
+          }
+        }
+      }
+      for(k=2; k<n; k++){
+        for(j=0; j<J; j++){
+          H[k][j] = A[k] * R[j] * H[k-1][j];
+          M1[k][j] = (k-1.0)/k * (A[k-2] * delta1[j] * ab1 * M1[k-1][j] + b1*M1[k-2][j]) - L1[k-2][j];
+          M2[k][j] = (k-1.0)/k * (A[k-2] * delta2[j] * ab2 * M2[k-1][j] + b2*M2[k-2][j]) - L2[k-2][j];
+        }
+      }
+    }
+  }
+  if(nu % 2 == 0){
+    int i;
+    std::vector<mp::float128> sum(J);
+    for(i=0; i<n; i+=2){
+      for(j=0; j<J; j++){
+        sum[j] += M2[i][j] - M1[i][j] + H[i][j];
+      }
+    }
+    double* out = new double[J];
+    for(j=0; j<J; j++){
+      out[j] = pnorm(-delta2[j]) - pnorm(-delta1[j]) +
+                root_two_pi*sum[j].convert_to<double>();
+    }
+    return out;
+  }else{
+    std::vector<mp::float128> sum(J);
+    int i;
+    for(i=1; i<n; i+=2){
+      for(j=0; j<J; j++){
+        sum[j] += M2[i][j] - M1[i][j] + H[i][j];
+      }
+    }
+    double* out = new double[J];
+    double* C = powenC(nu, t1, t2, delta1, delta2, J);
+    for(j=0; j<J; j++){
+      out[j] = C[j] + 2*sum[j].convert_to<double>();
+    }
+    delete[] C;
+    return out;
+  }
+}

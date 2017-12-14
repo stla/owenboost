@@ -56,7 +56,7 @@ powen nu t1 t2 delta1 delta2 = do
   mdelta1 <- V.thaw (V.fromList delta1)
   mdelta2 <- V.thaw (V.fromList delta2)
   ptr <- [CPP.exp| double* {
-      powen4($(int nu), $(double t1), $(double t2), $vec-ptr:(double* mdelta1), $vec-ptr:(double* mdelta2), $vec-len:mdelta1)
+      powen128($(int nu), $(double t1), $(double t2), $vec-ptr:(double* mdelta1), $vec-ptr:(double* mdelta2), $vec-len:mdelta1)
     } |]
   VM.clear mdelta1
   VM.clear mdelta2
