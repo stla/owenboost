@@ -324,7 +324,8 @@ double* studentCDF(double q, int nu, double* delta, size_t J){
   }
   if(nu>2){
     for(j=0; j<J; j++){
-      M[1][j] = b * (delta[j] * a * M[0][j] + a * dnorm128(delta[j]) / root_two_pi128);
+      M[1][j] = b *
+             (delta[j] * a * M[0][j] + a * dnorm128(delta[j]) / root_two_pi128);
     }
     if(nu>3){
       std::vector<mp::float128> A(nu-3);
@@ -337,7 +338,8 @@ double* studentCDF(double q, int nu, double* delta, size_t J){
       }
       for(k=2; k<nu-1; k++){
         for(j=0; j<J; j++){
-          M[k][j] = (k-1) * b * (A[k-2] * delta[j] * a * M[k-1][j] + M[k-2][j]) / k;
+          M[k][j] = (k-1) * b *
+                      (A[k-2] * delta[j] * a * M[k-1][j] + M[k-2][j]) / k;
         }
       }
     }
@@ -428,7 +430,8 @@ double* owenQ(int nu, double t, double* delta, double* R, size_t J){
   double M[n][J];
   for(j=0; j<J; j++){
     H[0][j] = -dnormR[j] * pnorm(a*R[j]-delta[j]);
-    M[0][j] = asb * dnormdsb[j] * (pnorm(delta[j]*asb) - pnorm(dabminusRoversb[j]));
+    M[0][j] = asb * dnormdsb[j] *
+                (pnorm(delta[j]*asb) - pnorm(dabminusRoversb[j]));
   }
   if(nu >= 3){
     for(j=0; j<J; j++){
@@ -458,7 +461,8 @@ double* owenQ(int nu, double t, double* delta, double* R, size_t J){
       for(k=2; k<n; k++){
         for(j=0; j<J; j++){
           H[k][j] = A[k] * R[j] * H[k-1][j];
-          M[k][j] = (k-1.0)/k * (A[k-2] * delta[j] * ab * M[k-1][j] + b*M[k-2][j]) - L[k-2][j];
+          M[k][j] = (k-1.0)/k *
+                 (A[k-2] * delta[j] * ab * M[k-1][j] + b*M[k-2][j]) - L[k-2][j];
         }
       }
     }
@@ -525,7 +529,8 @@ double* owenQ128(int nu, double t, double* delta, double* R, size_t J){
     dabminusRoversb[j] = (delta[j]*ab - R[j])/sb;
     dnormR[j] = dnorm128(R[j]);
     H[0][j] = -dnormR[j] * pnorm128(a*R[j]-delta[j]);
-    M[0][j] = asb * dnormdsb[j] * (pnorm128(delta[j]*asb) - pnorm128(dabminusRoversb[j]));
+    M[0][j] = asb * dnormdsb[j] *
+                (pnorm128(delta[j]*asb) - pnorm128(dabminusRoversb[j]));
   }
   if(nu >= 3){
     for(j=0; j<J; j++){
@@ -555,7 +560,8 @@ double* owenQ128(int nu, double t, double* delta, double* R, size_t J){
       for(k=2; k<n; k++){
         for(j=0; j<J; j++){
           H[k][j] = A[k] * R[j] * H[k-1][j];
-          M[k][j] = (k-1.0)/k * (A[k-2] * delta[j] * ab * M[k-1][j] + b*M[k-2][j]) - L[k-2][j];
+          M[k][j] = (k-1.0)/k *
+                 (A[k-2] * delta[j] * ab * M[k-1][j] + b*M[k-2][j]) - L[k-2][j];
         }
       }
     }
@@ -658,8 +664,10 @@ double* powen4(int nu, double t1, double t2, double* delta1, double* delta2, siz
   double H[n][J];
   for(j=0; j<J; j++){
     H[0][j] = -dnormR[j] * (pnorm(a2*R[j]-delta2[j]) - pnorm(a1*R[j]-delta1[j]));
-    M1[0][j] = asb1 * dnormdsb1[j] * (pnorm(delta1[j]*asb1) - pnorm(dabminusRoversb1[j]));
-    M2[0][j] = asb2 * dnormdsb2[j] * (pnorm(delta2[j]*asb2) - pnorm(dabminusRoversb2[j]));
+    M1[0][j] = asb1 * dnormdsb1[j] *
+                 (pnorm(delta1[j]*asb1) - pnorm(dabminusRoversb1[j]));
+    M2[0][j] = asb2 * dnormdsb2[j] *
+                 (pnorm(delta2[j]*asb2) - pnorm(dabminusRoversb2[j]));
   }
   if(nu >= 3){
     for(j=0; j<J; j++){
@@ -784,9 +792,12 @@ double* powen128(int nu, double t1, double t2, double* delta1, double* delta2, s
     dabminusRoversb1[j] = (delta1[j]*ab1 - R[j])/sb1;
     dabminusRoversb2[j] = (delta2[j]*ab2 - R[j])/sb2;
     dnormR[j] = dnorm128(R[j]);
-    H[0][j] = -dnormR[j] * (pnorm128(a2*R[j]-delta2[j]) - pnorm128(a1*R[j]-delta1[j]));
-    M1[0][j] = asb1 * dnormdsb1[j] * (pnorm128(delta1[j]*asb1) - pnorm128(dabminusRoversb1[j]));
-    M2[0][j] = asb2 * dnormdsb2[j] * (pnorm128(delta2[j]*asb2) - pnorm128(dabminusRoversb2[j]));
+    H[0][j] = -dnormR[j] *
+                (pnorm128(a2*R[j]-delta2[j]) - pnorm128(a1*R[j]-delta1[j]));
+    M1[0][j] = asb1 * dnormdsb1[j] *
+                 (pnorm128(delta1[j]*asb1) - pnorm128(dabminusRoversb1[j]));
+    M2[0][j] = asb2 * dnormdsb2[j] *
+                 (pnorm128(delta2[j]*asb2) - pnorm128(dabminusRoversb2[j]));
   }
   if(nu >= 3){
     for(j=0; j<J; j++){
@@ -821,8 +832,10 @@ double* powen128(int nu, double t1, double t2, double* delta1, double* delta2, s
       for(k=2; k<n; k++){
         for(j=0; j<J; j++){
           H[k][j] = A[k] * R[j] * H[k-1][j];
-          M1[k][j] = (k-1.0)/k * (A[k-2] * delta1[j] * ab1 * M1[k-1][j] + b1*M1[k-2][j]) - L1[k-2][j];
-          M2[k][j] = (k-1.0)/k * (A[k-2] * delta2[j] * ab2 * M2[k-1][j] + b2*M2[k-2][j]) - L2[k-2][j];
+          M1[k][j] = (k-1.0)/k *
+           (A[k-2] * delta1[j] * ab1 * M1[k-1][j] + b1*M1[k-2][j]) - L1[k-2][j];
+          M2[k][j] = (k-1.0)/k *
+           (A[k-2] * delta2[j] * ab2 * M2[k-1][j] + b2*M2[k-2][j]) - L2[k-2][j];
         }
       }
     }
