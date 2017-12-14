@@ -32,6 +32,9 @@ mp::float128 dnorm128(mp::float128 x){
 }
 
 mp::float128 pnorm128(mp::float128 q){
+  if(fabs(q) > DBL_MAX){
+    return q>0 ? mp::float128(1) : mp::float128(0);
+  }
   return m::erfc(-q * one_div_root_two128)/2;
 }
 
@@ -618,11 +621,11 @@ double* powenC(int nu, double t1, double t2, double* delta1, double* delta2, siz
   const double a1 = sign(t1)*sqrt(t1*t1/nu);
   const double b1 = nu/(nu+t1*t1);
   const double sb1 = sqrt(b1);
-  const double ab1 = a1*b1;
+  const double ab1 = fabs(t1)>DBL_MAX ? 0 : a1*b1;
   const double a2 = sign(t2)*sqrt(t2*t2/nu);
   const double b2 = nu/(nu+t2*t2);
   const double sb2 = sqrt(b2);
-  const double ab2 = a2*b2;
+  const double ab2 = fabs(t2)>DBL_MAX ? 0 : a2*b2;
   double R[J];
   int j;
   for(j=0; j<J; j++){
@@ -759,22 +762,35 @@ double* powen4(int nu, double t1, double t2, double* delta1, double* delta2, siz
   }
 }
 
+// -------------------------------------------------------------------------- //
 double* powen128(int nu, double t1, double t2, double* delta1, double* delta2, size_t J){
   if(nu == 1){
     return powenC(nu, t1, t2, delta1, delta2, J);
   }
-  mp::float128 t1t1(t1*t1);
-  mp::float128 a1 = sign(t1)*mp::sqrt(t1t1/nu);
-  mp::float128 b1 = nu/(nu+t1t1);
-  mp::float128 sb1 = mp::sqrt(b1);
-  mp::float128 ab1 = a1*b1;
-  mp::float128 t2t2(t2*t2);
-  mp::float128 a2 = sign(t2)*mp::sqrt(t2t2/nu);
-  mp::float128 b2 = nu/(nu+t2t2);
-  mp::float128 sb2 = mp::sqrt(b2);
-  mp::float128 ab2 = a2*b2;
-  mp::float128 asb1 = sign(t1)*mp::sqrt(t1t1/(nu+t1t1)); // diviser par t1t1
-  mp::float128 asb2 = sign(t2)*mp::sqrt(t2t2/(nu+t2t2));
+  const mp::float128 t1t1(t1*t1);
+  const mp::float128 a1 = sign(t1)*mp::sqrt(t1t1/nu);
+  const mp::float128 b1 = nu/(nu+t1t1);
+  const mp::float128 sb1 = mp::sqrt(b1);
+  mp::float128 ab1, asb1;
+  if(fabs(t1) > DBL_MAX){
+    ab1 = mp::float128(0);
+    asb1 = mp::float128(sign(t1));
+  }else{
+    ab1 = a1*b1;
+    asb1 = sign(t1) * mp::sqrt(t1t1/(nu+t1t1));
+  }
+  const mp::float128 t2t2(t2*t2);
+  const mp::float128 a2 = sign(t2)*mp::sqrt(t2t2/nu);
+  const mp::float128 b2 = nu/(nu+t2t2);
+  const mp::float128 sb2 = mp::sqrt(b2);
+  mp::float128 ab2, asb2;
+  if(fabs(t2) > DBL_MAX){ // pas besoin car t1>t2
+    ab2 = mp::float128(0);
+    asb2 = mp::float128(sign(t2));
+  }else{
+    ab2 = a2*b2;
+    asb2 = sign(t2) * mp::sqrt(t2t2/(nu+t2t2));
+  }
   mp::float128 R[J];
 //  mp::float128 dsb1[J];
 //  mp::float128 dsb2[J];
@@ -796,7 +812,7 @@ double* powen128(int nu, double t1, double t2, double* delta1, double* delta2, s
     dnormdsb2[j] = dnorm128(delta2[j] * sb2);
     dabminusRoversb1[j] = (delta1[j]*ab1 - R[j])/sb1;
     dabminusRoversb2[j] = (delta2[j]*ab2 - R[j])/sb2;
-    dnormR[j] = dnorm128(R[j]);
+    dnormR[j] = dnorm128(mp::float128(R[j]));
     H[0][j] = -dnormR[j] * (pnorm128(a2*R[j]-delta2[j]) - pnorm128(a1*R[j]-delta1[j]));
     M1[0][j] = asb1 * dnormdsb1[j] * (pnorm128(delta1[j]*asb1) - pnorm128(dabminusRoversb1[j]));
     M2[0][j] = asb2 * dnormdsb2[j] * (pnorm128(delta2[j]*asb2) - pnorm128(dabminusRoversb2[j]));
