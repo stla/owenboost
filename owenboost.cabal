@@ -24,7 +24,7 @@ flag dll
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Test
+  exposed-modules:     Owen
   build-depends:       base >= 4.7 && < 5
                      , inline-c-cpp
                      , inline-c
@@ -40,11 +40,11 @@ executable testowen128
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , owenboost
---
+
 foreign-library owen128
-  buildable: False
+  buildable: True
   type:                native-shared
-  lib-version-info:    6:3:2
+  lib-version-info:    0:1:0
   if os(Windows)
     options:      standalone
     mod-def-file: exports.def

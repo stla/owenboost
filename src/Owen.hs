@@ -2,7 +2,7 @@
 {-# LANGUAGE QuasiQuotes              #-}
 {-# LANGUAGE TemplateHaskell          #-}
 
-module Test
+module Owen
   where
 import           Data.Monoid                  ((<>))
 import qualified Data.Vector.Storable         as V

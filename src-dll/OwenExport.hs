@@ -3,14 +3,16 @@ module OwenExport
   where
 import           Foreign
 import           Foreign.C
-import Test
+import           Owen
 
-foreign export ccall pnormExport :: Ptr CDouble -> IO ()
-pnormExport :: Ptr CDouble -> IO ()
-pnormExport result = do
-  poke result pnorm
-
-foreign export ccall studentCexport :: Ptr CDouble -> IO ()
-studentCexport :: Ptr CDouble -> IO ()
-studentCexport result = do
-  (>>=) (studentC 1 1 [1,2]) (pokeArray result)
+foreign export ccall owenQexport :: Ptr CInt -> Ptr CDouble -> Ptr CDouble ->
+                                 Ptr CDouble -> Ptr CInt -> Ptr CDouble -> IO ()
+owenQexport :: Ptr CInt -> Ptr CDouble -> Ptr CDouble -> Ptr CDouble ->
+                                                Ptr CInt -> Ptr CDouble -> IO ()
+owenQexport nu t delta r n result = do
+  nu <- peek nu
+  t <- peek t
+  n <- peek n
+  delta <- peekArray (fromIntegral n) delta
+  r <- peekArray (fromIntegral n) r
+  (>>=) (owenQ128 nu t delta r) (pokeArray result)
