@@ -42,7 +42,7 @@ executable testowen128
                      , owenboost
 
 foreign-library owen128
-  buildable: True
+  buildable: False
   type:                native-shared
   lib-version-info:    0:1:0
   if os(Windows)

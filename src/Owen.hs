@@ -16,14 +16,10 @@ CPP.context (CPP.cppCtx <> C.vecCtx)
 
 CPP.include "<owen128.cpp>"
 
-studentC :: CDouble -> CInt -> [CDouble] -> IO [CDouble]
-studentC q nu delta = do
-  mdelta <- V.thaw (V.fromList delta)
-  ptr <- [CPP.exp| double* {
-      studentC($(double q), $(int nu), $vec-ptr:(double* mdelta), $vec-len:mdelta)
+owenT :: CDouble -> CDouble -> CDouble
+owenT h a = [CPP.pure| double {
+      owent($(double h), $(double a))
     } |]
-  VM.clear mdelta
-  peekArray (length delta) ptr
 
 studentCDF :: CDouble -> CInt -> [CDouble] -> IO [CDouble]
 studentCDF q nu delta = do
@@ -31,17 +27,6 @@ studentCDF q nu delta = do
   ptr <- [CPP.exp| double* {
       studentCDF($(double q), $(int nu), $vec-ptr:(double* mdelta), $vec-len:mdelta)
     } |]
-  peekArray (length delta) ptr
-
-owenC :: CInt -> CDouble -> [CDouble] -> [CDouble] -> IO [CDouble]
-owenC nu t delta r = do
-  mdelta <- V.thaw (V.fromList delta)
-  mr <- V.thaw (V.fromList r)
-  ptr <- [CPP.exp| double* {
-      owenC($(int nu), $(double t), $vec-ptr:(double* mdelta), $vec-ptr:(double* mr), $vec-len:mdelta)
-    } |]
-  VM.clear mdelta
-  VM.clear mr
   peekArray (length delta) ptr
 
 owenQ :: CInt -> CDouble -> [CDouble] -> [CDouble] -> IO [CDouble]
