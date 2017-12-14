@@ -68,7 +68,7 @@ executable Owen128
   build-depends:       base >= 4.7 && < 5
                      , owenboost
   if os(windows)
-    ghc-options:         -threaded -O2 -shared StartEnd.c -o Owen128.dll
+    ghc-options:         -lstdc++ -shared StartEnd.c -o Owen128.dll
   else
     ghc-options:         -threaded -O2 -shared -fPIC -dynamic -lHSrts-ghc8.0.2 StartEnd.c -o Owen128.so
 
